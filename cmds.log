@@ -1,0 +1,28 @@
+    1  export DATETIME=`date "+%Y%m%d_%H%M%S"`
+    2  echo $DATETIME
+    3  mkdir PRODUCTS
+    4  cd assignments/a2/PRODUCTS/
+    5  cp 0002171856.txt ~/PRODUCTS/0002171856.$DATETIME.txt
+    6  cd ~/PRODUCTS/
+    7  ls
+    8  wc -l 0002171856.$DATETIME.txt
+    9  tail 0002171856.$DATETIME.txt
+   10  echo "2	2" 0002171856.$DATETIME.txt
+   11  echo "2	2" >> 0002171856.$DATETIME.txt
+   12  wc -l 0002171856.$DATETIME.txt
+   13  tail 0002171856.$DATETIME.txt
+   14  ln -s ~/PRODUCTS/0002171856.$DATETIME.txt ~/PRODUCTS/0002171856.LATEST.txt
+   15  ls
+   16  nano
+   17  ls
+   18  stat compute_avg.sh
+   19  chmod +x compute_avg.sh
+   20  crontab -e
+   21  stat compute_avg.sh
+   22  crontab -e
+   23  ls
+   24  cat 0002171856.AVGRATING.txt
+   25  rm 0002171856.AVGRATING.txt
+   26  ls
+   27  cat 0002171856.AVGRATING.txt
+   28  history > ~/cmds.log

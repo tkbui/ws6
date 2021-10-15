@@ -1,0 +1,168 @@
+T.K. Bui | CS 185C | Worksheet 6, due 10/14/2021
+======================================================================================================================
+Script started on 2021-10-15 01:47:49+00:00 [TERM="xterm" TTY="/dev/pts/0" COLUMNS="189" LINES="52"]
+
+----------------------------------------------------------------------------------------------------------------------
+1) Get a current datetime stamp in a variable DATETIME (as shown in the slides).
+
+bui@f6linuxA7:~$ export DATETIME=`date "+%Y%m%d_%H%M%S"`
+
+bui@f6linuxA7:~$ echo $DATETIME
+20211015_014806
+
+----------------------------------------------------------------------------------------------------------------------
+2) cp the file PRODUCTS/productID.txt to a file PRODUCTS/productID.DATETIME.txt (where DATETIME is the current 
+   datetimestamp you got)
+
+bui@f6linuxA7:~$ mkdir PRODUCTS
+
+bui@f6linuxA7:~$ cd assignments/a2/PRODUCTS/
+
+bui@f6linuxA7:~/assignments/a2/PRODUCTS$ cp 0002171856.txt ~/PRODUCTS/0002171856.$DATETIME.txt
+
+bui@f6linuxA7:~/assignments/a2/PRODUCTS$ cd ~/PRODUCTS/
+
+bui@f6linuxA7:~/PRODUCTS$ ls
+0002171856.20211015_014806.txt
+
+EXPLANATION: I made the PRODUCTS directory in my home directory first, then copied a product file from Assignment 2's
+work over to that directory with the DATETIME variable in the file name.
+
+----------------------------------------------------------------------------------------------------------------------
+3) Append a new row to the end of PRODUCTS/productID.DATETIME.txt as a new product review (the row contents don't
+   matter, just make sure the rating_score you give is a numerical value).
+
+bui@f6linuxA7:~/PRODUCTS$ wc -l 0002171856.$DATETIME.txt
+22 0002171856.20211015_014806.txt
+
+bui@f6linuxA7:~/PRODUCTS$ tail 0002171856.$DATETIME.txt
+5	11
+5	3
+1	45
+5	308
+5	23
+5	1
+5	1
+5	0
+4	1
+5	3
+
+bui@f6linuxA7:~/PRODUCTS$ echo "2	2" >> 0002171856.$DATETIME.txt
+
+bui@f6linuxA7:~/PRODUCTS$ wc -l 0002171856.$DATETIME.txt
+23 0002171856.20211015_014806.txt
+
+bui@f6linuxA7:~/PRODUCTS$ tail 0002171856.$DATETIME.txt
+5	3
+1	45
+5	308
+5	23
+5	1
+5	1
+5	0
+4	1
+5	3
+2	2
+
+EXPLANATION: Before appending a new row, I show the before and after of adding the row. The file has 2 columns
+from Assignment 2, the first being the star rating/rating score and the second being the helpfulness score.
+Then, I append the new row, using CTRL+V then CTRL+I after the first 2 in order to get the separating tab
+in between for the columns.
+
+----------------------------------------------------------------------------------------------------------------------
+4) Create a symbolic link named PRODUCTS/productID.LATEST.txt that points to file PRODUCTS/productID.DATETIME.txt
+
+bui@f6linuxA7:~/PRODUCTS$ ln -s ~/PRODUCTS/0002171856.$DATETIME.txt ~/PRODUCTS/0002171856.LATEST.txt
+
+bui@f6linuxA7:~/PRODUCTS$ ls
+0002171856.20211015_014806.txt  0002171856.LATEST.txt
+
+----------------------------------------------------------------------------------------------------------------------
+5) Write a cron tab that once a minute checks the file PRODUCTS/productID.LATEST.txt (the symbolic link, such that
+   you can change the symlink in order to get the latest product reviews file) and outputs the mean (average)
+   rating_score for this product to a file PRODUCTS/productID.AVGRATING.txt
+
+bui@f6linuxA7:~/PRODUCTS$ nano
+
+-----
+**Since the nano editor puts a big, unorganized chunk into the script text file, I removed that part. But what I 
+did was create a script file "compute_avg.sh" that had the following lines:
+
+total=0
+count=0
+for i in `awk '{print $1}' ~/PRODUCTS/0002171856.LATEST.txt`; do total=$(echo $total+$i | bc ); count=$(echo $count+1 | bc); avg=$(echo "scale=2; $total / $count" | bc ); done
+echo $avg
+
+Because we only want to get the average rating score, we take just the first column (star rating/rating score we got
+from Assignment 2).
+-----
+
+bui@f6linuxA7:~/PRODUCTS$ ls
+0002171856.20211015_014806.txt  0002171856.LATEST.txt  compute_avg.sh
+
+bui@f6linuxA7:~/PRODUCTS$ stat compute_avg.sh
+  File: compute_avg.sh
+  Size: 202       	Blocks: 8          IO Block: 4096   regular file
+Device: 802h/2050d	Inode: 4723406     Links: 1
+Access: (0664/-rw-rw-r--)  Uid: ( 1001/     bui)   Gid: ( 1001/     bui)
+Access: 2021-10-15 01:51:39.456868588 +0000
+odify: 2021-10-15 01:51:39.456868588 +0000
+Change: 2021-10-15 01:51:39.456868588 +0000
+ Birth: -
+
+bui@f6linuxA7:~/PRODUCTS$ chmod +x compute_avg.sh
+
+bui@f6linuxA7:~/PRODUCTS$ stat compute_avg.sh
+  File: compute_avg.sh
+  Size: 202       	Blocks: 8          IO Block: 4096   regular file
+Device: 802h/2050d	Inode: 4723406     Links: 1
+Access: (0775/-rwxrwxr-x)  Uid: ( 1001/     bui)   Gid: ( 1001/     bui)
+Access: 2021-10-15 01:51:39.456868588 +0000
+odify: 2021-10-15 01:51:39.456868588 +0000
+Change: 2021-10-15 01:51:56.800989399 +0000
+ Birth: -
+
+bui@f6linuxA7:~/PRODUCTS$ crontab -e
+
+-----
+**Like above, since the nano editor includes a bunch of extra text, I basically edited this file to add
+the job I wanted to repeat every minute with the following command:
+
+* * * * * ~/PRODUCTS/compute_avg.sh > ~/PRODUCTS/0002171856.AVGRATING.txt
+-----
+
+bui@f6linuxA7:~/PRODUCTS$ ls
+0002171856.20211015_014806.txt  0002171856.LATEST.txt  compute_avg.sh
+
+bui@f6linuxA7:~/PRODUCTS$ ls
+0002171856.20211015_014806.txt  0002171856.AVGRATING.txt  0002171856.LATEST.txt  compute_avg.sh
+
+bui@f6linuxA7:~/PRODUCTS$ cat 0002171856.AVGRATING.txt
+4.56
+
+bui@f6linuxA7:~/PRODUCTS$ rm 0002171856.AVGRATING.txt
+
+bui@f6linuxA7:~/PRODUCTS$ ls
+0002171856.20211015_014806.txt  0002171856.LATEST.txt  compute_avg.sh
+
+bui@f6linuxA7:~/PRODUCTS$ ls
+0002171856.20211015_014806.txt  0002171856.AVGRATING.txt  0002171856.LATEST.txt  compute_avg.sh
+
+bui@f6linuxA7:~/PRODUCTS$ cat 0002171856.AVGRATING.txt
+4.56
+
+EXPLANATION: I created a .sh script file with the variables and commands needed to get the average
+rating using the symlink LATEST file I made for the productid file, then added a cron tab for this
+script in the crontab file that would run the script and write its output to the AVGRATING file. 
+I had to add execute permissions to the .sh file before creating the crontab, otherwise it would
+not be able to be run.
+
+At the end, I show that I'm indeed generating the AVGRATING file and successfully writing the average to that file,
+and then when I delete the file, it is still recreated a minute later from the crontab job.
+
+======================================================================================================================
+bui@f6linuxA7:~/PRODUCTS$ history > ~/cmds.log
+
+bui@f6linuxA7:~/PRODUCTS$ exit
+
+Script done on 2021-10-15 01:54:52+00:00 [COMMAND_EXIT_CODE="0"]
